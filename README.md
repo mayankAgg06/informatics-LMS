@@ -1,178 +1,160 @@
-<div align="center" markdown="1">
+# 🚀 Frappe + Bench Installation Guide (2025)
 
-<img src=".github/lms-logo.png" alt="Frappe Learning logo" width="80" height="80"/>
-<h1>Frappe Learning</h1>
+A complete, step-by-step guide to install **Frappe Framework**, **Bench**, **MariaDB**, **Redis**, and all dependencies on **Ubuntu / WSL2 / Linux**.
 
-**Easy to use, open source, Learning Management System**
+This guide is fully working and tested in **2025**.
 
-![Tests](https://img.shields.io/endpoint?url=https://dashboard.cypress.io/badge/simple/vandxn/main&style=flat&logo=cypress)
+---
 
-</div>
-
-
-<div align="center">
-	<img src=".github/hero.png?v=5" alt="Hero Image" width="72%" />
-</div>
-<br />
-<div align="center">
-	<a href="https://frappe.io/learning">Website</a>
-	-
-	<a href="https://docs.frappe.io/learning">Documentation</a>
-</div>
-
-## Frappe Learning
-Frappe Learning is an easy-to-use learning system that helps you bring structure to your content.
-
-### Motivation
-In 2021, we were looking for a Learning Management System to launch [Mon.School](https://mon.school) for FOSS United. We checked out Moodle, but it didn’t feel right. The forms were unnecessarily lengthy and the UI was confusing. It shouldn't be this hard to create a course right? So I started making a learning system for Mon.School which soon became a product in itself. The aim is to have a simple platform that anyone can use to launch a course of their own and make knowledge sharing easier.
-
-### Key Features
-
-- **Structured Learning**: Design a course with a 3-level hierarchy, where your courses have chapters and you can group your lessons within these chapters. This ensures that the context of the lesson is set by the chapter.
-
-- **Live Classes**: Group learners into batches based on courses and duration. You can then create Zoom live class for these batches right from the app. Learners get to see the list of live classes they have to take as a part of this batch.
-
-- **Quizzes and Assignments**: Create quizzes where questions can have single-choice, multiple-choice options, or can be open ended. Instructors can also add assignments which learners can submit as PDF's or Documents.
-
-- **Getting Certified**: Once a learner has completed the course or batch, you can grant them a certificate. The app provides an inbuilt certificate template. You can use this or else create a template of your own and use that instead.
-
-<details>
-<summary>View Screenshots</summary>
-
-
-![Batch](.github/batch.png)
-<div align="center">
-	<sub>
-		Create batches to group your learners
-	</sub>
-</div>
-<br>
-
-
-![Quiz](.github/quiz.png)
-<div align="center">
-	<sub>
-		Evaluate their knowledge by quizzes
-	</sub>
-</div>
-<br>
-
-
-![Cerficicate](.github/certificate.png)
-<div align="center">
-	<sub>
-		Autenticate their work with certification
-	</sub>
-</div>
-</details>
-
-
-### Under the Hood
-
-- [**Frappe Framework**](https://github.com/frappe/frappe): A full-stack web application framework.
-
-- [**Frappe UI**](https://github.com/frappe/frappe-ui): A Vue-based UI library, to provide a modern user interface.
-
-## Production Setup
-
-### Managed Hosting
-
-You can try [Frappe Cloud](https://frappecloud.com), a simple, user-friendly and sophisticated [open-source](https://github.com/frappe/press) platform to host Frappe applications with peace of mind.
-
-It takes care of installation, setup, upgrades, monitoring, maintenance and support of your Frappe deployments. It is a fully featured developer platform with an ability to manage and control multiple Frappe deployments.
-
-<div>
-	<a href="https://frappecloud.com/lms/signup" target="_blank">
-		<picture>
-			<source media="(prefers-color-scheme: dark)" srcset="https://frappe.io/files/try-on-fc-white.png">
-			<img src="https://frappe.io/files/try-on-fc-black.png" alt="Try on Frappe Cloud" height="28" />
-		</picture>
-	</a>
-</div>
-
-### Self Hosting
-
-Follow these steps to set up Frappe Learning in production:
-
-**Step 1**: Download the easy install script
+## 📌 1. System Update
 
 ```bash
-wget https://frappe.io/easy-install.py
-```
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git curl wget build-essential software-properties-common
 
-**Step 2**: Run the deployment command
+📌 2. Install Python & Required Tools
+sudo apt install -y python3 python3-dev python3-setuptools python3-pip python3-venv
 
-```bash
-python3 ./easy-install.py deploy \
-    --project=learning_prod_setup \
-    --email=your_email.example.com \
-    --image=ghcr.io/frappe/lms \
-    --version=stable \
-    --app=lms \
-    --sitename subdomain.domain.tld
-```
+📌 3. Install NodeJS (Recommended: Node 18 LTS)
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
 
-Replace the following parameters with your values:
-- `your_email.example.com`: Your email address
-- `subdomain.domain.tld`: Your domain name where Learning will be hosted
+📌 4. Enable Corepack & Install Yarn
+sudo corepack enable
+sudo corepack prepare yarn@stable --activate
+yarn --version
 
-The script will set up a production-ready instance of Frappe Learning with all the necessary configurations in about 5 minutes.
+📌 5. Install Redis
+sudo apt install -y redis-server
+sudo service redis-server start
+sudo systemctl enable redis-server
 
-**Note:** To avoid a `404 Page Not Found` error:
-- If hosting on a **public server**, make sure your DNS **A record** points to your server's IP.
-- If hosting **locally**, map your domain to `127.0.0.1` in your `/etc/hosts` file:
+📌 6. Install MariaDB (Database)
+sudo apt install -y mariadb-server mariadb-client
+sudo service mysql start
 
-## Development Setup
+📌 7. Fix MariaDB Authentication (Important)
 
-### Docker
+MariaDB uses auth_socket by default which breaks Bench DB setup.
 
-You need Docker, docker-compose and git setup on your machine. Refer [Docker documentation](https://docs.docker.com/). After that, follow below steps:
+Create a dedicated DB admin account:
 
-**Step 1**: Setup folder and download the required files
+sudo mysql
 
-    mkdir frappe-learning
-    cd frappe-learning
 
-    # Download the docker-compose file
-    wget -O docker-compose.yml https://raw.githubusercontent.com/frappe/lms/develop/docker/docker-compose.yml
+Inside MariaDB prompt:
 
-    # Download the setup script
-    wget -O init.sh https://raw.githubusercontent.com/frappe/lms/develop/docker/init.sh
+CREATE USER 'frappeuser'@'localhost' IDENTIFIED BY 'FrappeDBPass!';
+GRANT ALL PRIVILEGES ON *.* TO 'frappeuser'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+EXIT;
 
-**Step 2**: Run the container and daemonize it
 
-    docker compose up -d
+✔ Avoids 1698 “Access Denied” errors
+✔ Works perfectly with Bench
 
-**Step 3**: The site [http://lms.localhost:8000/lms](http://lms.localhost:8000/lms) should now be available. The default credentials are:
-- Username: Administrator
-- Password: admin
+📌 8. Install Bench CLI
+pip3 install frappe-bench
+bench --version
 
-### Local
 
-To setup the repository locally follow the steps mentioned below:
+If bench not detected:
 
-1. Install bench and setup a `frappe-bench` directory by following the [Installation Steps](https://frappeframework.com/docs/user/en/installation)
-1. Start the server by running `bench start`
-1. In a separate terminal window, create a new site by running `bench new-site learning.test`
-1. Map your site to localhost with the command `bench --site learning.test add-to-hosts`
-1. Get the Learning app. Run `bench get-app https://github.com/frappe/lms`
-1. Run `bench --site learning.test install-app lms`.
-1. Now open the URL `http://learning.test:8000/lms` in your browser, you should see the app running
+export PATH="$HOME/.local/bin:$PATH"
 
-## Learn and connect
 
-- [Telegram Public Group](https://t.me/frappelms)
-- [Discuss Forum](https://discuss.frappe.io/c/lms/70)
-- [Documentation](https://docs.frappe.io/learning)
-- [YouTube](https://www.youtube.com/channel/UCn3bV5kx77HsVwtnlCeEi_A)
+(Add to ~/.bashrc for persistence.)
 
-<br>
-<br>
-<div align="center" style="padding-top: 0.75rem;">
-	<a href="https://frappe.io" target="_blank">
-		<picture>
-			<source media="(prefers-color-scheme: dark)" srcset="https://frappe.io/files/Frappe-white.png">
-			<img src="https://frappe.io/files/Frappe-black.png" alt="Frappe Technologies" height="28"/>
-		</picture>
-	</a>
-</div>
+📌 9. Create a Bench Instance
+bench init frappe-bench
+
+📌 10. Create Your First Frappe Site
+cd frappe-bench
+bench new-site mysite.localhost
+
+
+Inputs:
+
+MySQL Super User: frappeuser
+
+Password: FrappeDBPass!
+
+Set Administrator password when asked
+
+📌 11. Fix Hostname Mapping (Required)
+
+Frappe serves sites based on hostname.
+
+Linux / WSL:
+sudo sh -c "echo '127.0.0.1 mysite.localhost' >> /etc/hosts"
+
+Windows (if accessing via Windows browser during WSL use):
+
+Edit:
+
+C:\Windows\System32\drivers\etc\hosts
+
+
+Add:
+
+127.0.0.1 mysite.localhost
+
+
+Or if WSL shows a specific IP (example):
+
+172.29.51.143 mysite.localhost
+
+📌 12. Start Bench
+bench start
+
+
+You should see:
+
+Running on http://127.0.0.1:8000
+Running on http://<WSL-IP>:8000
+
+
+Open your site:
+
+http://mysite.localhost:8000/login
+
+
+Login:
+
+Username: Administrator
+
+Password: (the one you set)
+
+🎉 Your Frappe site is now live!
+
+⚙ Optional Add-ons
+📌 13. Install ERPNext (Optional)
+bench get-app erpnext --branch version-15
+bench --site mysite.localhost install-app erpnext
+
+📌 14. Enable Scheduler (Optional)
+bench --site mysite.localhost set-config enable_scheduler true
+bench restart
+
+📌 15. Fix Redis "vm.overcommit_memory" Warning (Optional)
+echo 'vm.overcommit_memory=1' | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+🛠 Common Errors & Fixes
+❌ 404 Not Found
+
+✔ Use hostname URL, not IP
+
+http://mysite.localhost:8000/login
+
+❌ Access denied for user 'root'@'localhost' (1698)
+
+✔ Use your created user:
+
+frappeuser / FrappeDBPass!
+
+❌ bench not found
+
+✔ Add to PATH:
+
+export PATH="$HOME/.local/bin:$PATH"
